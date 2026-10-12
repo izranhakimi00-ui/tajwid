@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="ms" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Anti-Gravity Tajwid Challenge | Cabaran Tajwid Anti-Graviti</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Kanvas Angkasa Lepas, Lohong Hitam & Kapal Angkasa -->
+  <canvas id="space-canvas"></canvas>
+
+  <!-- Lapisan Antara Muka Pengguna (UI) -->
+  <div id="game-app">
+
+    <!-- 1. SKRIN MULA (START SCREEN) -->
+    <section id="screen-start" class="game-screen active interactive-layer">
+      <div class="card-glass">
+        <div class="badge-tag">Projek Kursus Tajwid Universiti</div>
+        <h1 class="game-title">ANTI-GRAVITY TAJWID CHALLENGE</h1>
+        <p class="game-subtitle">Cabaran Pendidikan Interaktif: Melepasi Tarikan Lohong Hitam</p>
+
+        <div class="mission-brief">
+          <strong>🛰️ Taklimat Misi Angkasa:</strong><br>
+          Kapal angkasa penjelajah anda kini terperangkap dalam medan graviti ekstrem Lohong Hitam!
+          Jawab soalan hukum Tajwid dengan tepat untuk menjana tenaga <strong>Enjin Anti-Graviti</strong> (+100 km).
+          Kesilapan jawapan akan menyebabkan kapal ditarik tenggelam ke arah Ufuk Peristiwa (*Event Horizon*).
+        </div>
+
+        <div class="rules-preview">
+          <div class="rule-chip">
+            <span class="rule-chip-icon">✨</span>
+            <div class="rule-chip-text">1. Izhar Halqi (Contoh: أَنْعَمْتَ)</div>
+          </div>
+          <div class="rule-chip">
+            <span class="rule-chip-icon">🌊</span>
+            <div class="rule-chip-text">2. Idgham Ma'al Ghunnah (Contoh: لَهَبٍ وَتَبَّ)</div>
+          </div>
+          <div class="rule-chip">
+            <span class="rule-chip-icon">🌌</span>
+            <div class="rule-chip-text">3. Ikhfa' Haqiqi (Contoh: مَنْ ثَقُلَتْ)</div>
+          </div>
+          <div class="rule-chip">
+            <span class="rule-chip-icon">⚡</span>
+            <div class="rule-chip-text">4. Qalqalah (Contoh: أَحَدٌ - Waqaf Dal)</div>
+          </div>
+        </div>
+
+        <button id="btn-start-game" class="btn-primary">
+          <span>🚀</span> MULAKAN MISI ANGKASA
+        </button>
+      </div>
+    </section>
+
+    <!-- 2. SKRIN PERMAINAN & KUIZ (GAMEPLAY SCREEN) -->
+    <section id="screen-game" class="game-screen interactive-layer">
+
+      <!-- HUD Atas (Altitud, Skor & Amaran Graviti) -->
+      <header class="game-hud">
+        <div class="hud-group">
+          <!-- Tolok Altitud -->
+          <div class="altitude-container">
+            <div class="hud-label">Tolok Altitud Kapal</div>
+            <div class="altitude-bar-bg">
+              <div id="altitude-bar-fill" class="altitude-bar-fill"></div>
+            </div>
+            <div class="altitude-markers">
+              <span>0 km (Lohong Hitam)</span>
+              <span id="hud-altitude" class="hud-value" style="font-size: 13px;">100 km</span>
+              <span>500 km (Selamat)</span>
+            </div>
+          </div>
+
+          <!-- Skor Semasa -->
+          <div class="hud-item">
+            <div class="hud-label">Skor Tenaga</div>
+            <div id="hud-score" class="hud-value">0</div>
+          </div>
+        </div>
+
+        <!-- Status Penunjuk Graviti -->
+        <div id="gravity-status" class="gravity-indicator">
+          🌌 SISTEM ANTI-GRAVITI STABIL
+        </div>
+
+        <!-- Butang Kawalan Audio & Rujukan -->
+        <div class="hud-group">
+          <button id="btn-open-archive" class="hud-btn" title="Buka Arkib Rujukan Tajwid">
+            📖 Arkib Tajwid
+          </button>
+          <button id="btn-audio-toggle" class="hud-btn" title="Hidup / Matikan Bunyi">
+            🔊 Bunyi: Hidup
+          </button>
+        </div>
+      </header>
+
+      <!-- Bekas Soalan Tajwid -->
+      <main class="quiz-container">
+
+        <!-- Banner Tahap -->
+        <div class="level-banner">
+          <div class="level-title-group">
+            <span id="q-level-tag" class="level-tag">TAHAP 1</span>
+            <span id="q-level-name" class="level-name">Zon 1: Sfera Izhar Halqi</span>
+          </div>
+          <span id="q-counter" class="q-counter">Soalan 1 / 3</span>
+        </div>
+
+        <!-- Kad Potongan Ayat Al-Quran -->
+        <div class="verse-box">
+          <div id="verse-arabic" class="verse-arabic">
+            صِرَاطَ الَّذِينَ أَنْعَمْتَ عَلَيْهِمْ
+          </div>
+          <div class="verse-meta">
+            <span id="verse-ref" class="verse-ref">Surah Al-Fatihah : 7</span>
+            <span>Teliti sebutan hukum & baris pada perkataan bertanda</span>
+          </div>
+        </div>
+
+        <!-- Soalan Aneka Pilihan -->
+        <div id="question-text" class="question-card">
+          Apakah hukum tajwid pada kalimah [ أَنْعَمْتَ ] dan apakah sebab berlakunya hukum tersebut?
+        </div>
+
+        <!-- Grid 4 Pilihan Jawapan -->
+        <div id="options-container" class="options-grid">
+          <!-- Butang pilihan dimasukkan secara dinamik oleh game.js -->
+        </div>
+
+        <!-- Kad Maklum Balas Segera (Feedback Box) -->
+        <div id="feedback-box" class="feedback-box">
+          <div class="feedback-header">
+            <div id="feedback-title" class="feedback-title">
+              🚀 TUJAHAN ANTI-GRAVITI DIAKTIFKAN!
+            </div>
+            <div id="feedback-alt-change" class="feedback-altitude-change up">
+              +100 km Altitud
+            </div>
+          </div>
+
+          <div id="feedback-explanation" class="feedback-explanation">
+            <!-- Huraian ilmiah Tajwid -->
+          </div>
+
+          <div class="feedback-action-bar">
+            <button id="btn-next-question" class="btn-next">
+              Teruskan Penerbangan ➔
+            </button>
+          </div>
+        </div>
+
+      </main>
+
+    </section>
+
+    <!-- 3. SKRIN KEJAYAAN (VICTORY SCREEN) -->
+    <section id="screen-victory" class="game-screen interactive-layer">
+      <div class="card-glass">
+        <div class="victory-icon">🏆</div>
+        <div class="badge-tag">Kelajuan Lepas Ditembusi</div>
+        <h1 class="game-title">MISI BERJAYA!</h1>
+        <p class="game-subtitle">Kapal Angkasa Berjaya Melepasi Tarikan Lohong Hitam!</p>
+
+        <p style="font-size: 16px; color: #cbd5e1; line-height: 1.6; margin-bottom: 20px;">
+          Tahniah, anda telah berjaya membuktikan penguasaan ilmu Tajwid peringkat tinggi.
+          Enjin Anti-Graviti telah melonjakkan kapal melepasi daya tarikan singulariti lohong hitam ke orbit selamat kosmik.
+        </p>
+
+        <div class="stat-grid">
+          <div class="stat-card">
+            <div id="vic-altitude" class="stat-val">500 km</div>
+            <div class="stat-lbl">Altitud Tertinggi</div>
+          </div>
+          <div class="stat-card">
+            <div id="vic-score" class="stat-val">1500</div>
+            <div class="stat-lbl">Skor Tenaga</div>
+          </div>
+          <div class="stat-card">
+            <div id="vic-accuracy" class="stat-val">100%</div>
+            <div class="stat-lbl">Ketepatan Tajwid</div>
+          </div>
+        </div>
+
+        <button id="btn-restart-victory" class="btn-primary">
+          <span>🔄</span> MAINKAN SEMULA MISI
+        </button>
+      </div>
+    </section>
+
+    <!-- 4. SKRIN AMARAN KEGAGALAN / TERPERANGKAP (GAME OVER) -->
+    <section id="screen-gameover" class="game-screen interactive-layer">
+      <div class="card-glass" style="border-color: var(--alert-red); box-shadow: 0 0 40px rgba(239, 71, 111, 0.4);">
+        <div style="font-size: 56px; margin-bottom: 12px;">⚠️</div>
+        <div class="badge-tag" style="background: rgba(239, 71, 111, 0.2); border-color: var(--alert-red); color: #fca5a5;">
+          Ufuk Peristiwa (Event Horizon)
+        </div>
+        <h1 class="game-title" style="background: linear-gradient(135deg, #ffffff, #ef476f); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+          KAPAL TERPERANGKAP!
+        </h1>
+        <p class="game-subtitle" style="color: #fca5a5;">Tarikan Graviti Lohong Hitam Terlalu Kuat!</p>
+
+        <p style="font-size: 15px; color: #cbd5e1; line-height: 1.6; margin-bottom: 24px;">
+          Altitud kapal telah jatuh ke 0 km akibat kesilapan analisis hukum tajwid.
+          Sila ulang kaji kaedah sebutan Nun Sakinah, Tanwin, dan Qalqalah sebelum melancarkan semula tujahan anti-graviti!
+        </p>
+
+        <div style="margin-bottom: 24px; font-size: 14px; color: var(--text-muted);">
+          Terakhir di: <span id="over-level" style="color: var(--neon-cyan); font-weight: 700;">Tahap 1</span> |
+          Skor: <span id="over-score" style="color: var(--neon-gold); font-weight: 700;">0</span>
+        </div>
+
+        <button id="btn-restart-gameover" class="btn-primary" style="background: linear-gradient(135deg, #ef476f 0%, #b5179e 100%);">
+          <span>⚡</span> KITAR SEMULA ENJIN & CUBA LAGI
+        </button>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- MODAL: ARKIB NOTA TAJWID KOSMIK -->
+  <div id="modal-archive" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>📖 Arkib Rujukan Tajwid Peringkat Universiti</h3>
+        <button id="btn-close-archive" class="modal-close">&times;</button>
+      </div>
+      <div id="archive-content" class="modal-body">
+        <!-- Diisi secara automatik oleh game.js daripada TAJWID_ARCHIVE -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Skrip Pangkalan Data & Enjin Permainan -->
+  <script src="tajwid-data.js"></script>
+  <script src="game.js"></script>
+
+</body>
+</html>

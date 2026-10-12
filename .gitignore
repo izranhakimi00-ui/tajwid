@@ -1,0 +1,11 @@
+# Sistem & Log
+.DS_Store
+Thumbs.db
+*.log
+.system_generated/
+__pycache__/
+*.pyc
+
+# IDE & Editor
+.vscode/
+.idea/
