@@ -671,7 +671,7 @@ loadQuestion() {
 
     const letters = ['A', 'B', 'C', 'D'];
     
-    // 🛠️ KOD FIRMWARE RAWAK: Indeks kedudukan butang visual (0-3) yang lengkap
+    // 🛠️ KOD ADALAH LENGKAP: Memasukkan array [0, 1, 2, 3] untuk dikocok secara rawak
     const orders =;
     for (let i = orders.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
@@ -681,6 +681,18 @@ loadQuestion() {
     currentQ.options.forEach((opt, idx) => {
       const btn = document.createElement('button');
       btn.className = 'option-btn';
+      
+      // Susun kedudukan butang secara rawak dkt skrin guna CSS order
+      btn.style.order = orders[idx]; 
+      
+      btn.innerHTML = `
+        <span class="option-letter">${letters[idx]}</span>
+        <span class="option-text">${opt.text}</span>
+      `;
+      btn.addEventListener('click', () => this.handleAnswer(opt, btn, currentQ));
+      this.optionsContainer.appendChild(btn);
+    });
+  }
       
       // Susun kedudukan butang secara rawak dkt skrin guna CSS order
       btn.style.order = orders[idx]; 
