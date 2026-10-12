@@ -828,7 +828,7 @@ html, body {
     grid-template-columns: 1fr;
   }
 }
-/* Kod Pembaikan Menyeluruh: Fleksibel untuk Laptop & Telefon */
+/* Kod Fleksibel Menyeluruh */
 html, body {
     height: auto !important;
     min-height: 100vh !important;
@@ -838,19 +838,17 @@ html, body {
     padding: 0;
 }
 
-/* Memastikan kontena utama mengecil ikut saiz skrin telefon */
 #game-container, .container, .card, main {
     width: 100% !important;
-    max-width: 600px !important; /* Saiz ideal untuk komputer/laptop */
+    max-width: 600px !important;
     height: auto !important;
     min-height: min-content !important;
     margin: 0 auto !important;
-    box-sizing: border-box !important;
-    padding: 15px !important; /* Kurangkan padding supaya muat di telefon */
+    padding: 15px !important;
     overflow: visible !important;
+    box-sizing: border-box !important;
 }
 
-/* Mengelakkan teks atau kotak menu daripada terkeluar dari skrin */
 * {
     max-width: 100% !important;
     box-sizing: border-box !important;
