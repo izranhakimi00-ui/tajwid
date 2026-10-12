@@ -828,28 +828,16 @@ html, body {
     grid-template-columns: 1fr;
   }
 }
-/* Kod Fleksibel Menyeluruh */
-html, body {
+/* Pembaikan Paksa Skrol Elemen Dalaman */
+html, body, #game-container, .container, .card, main, div, section {
     height: auto !important;
-    min-height: 100vh !important;
+    min-height: 100% !important;
+    max-height: none !important;
     overflow-y: auto !important;
     overflow-x: hidden !important;
-    margin: 0;
-    padding: 0;
 }
 
-#game-container, .container, .card, main {
-    width: 100% !important;
-    max-width: 600px !important;
-    height: auto !important;
-    min-height: min-content !important;
-    margin: 0 auto !important;
-    padding: 15px !important;
-    overflow: visible !important;
-    box-sizing: border-box !important;
-}
-
-* {
-    max-width: 100% !important;
-    box-sizing: border-box !important;
+/* Memastikan butang di bahagian bawah sentiasa ada ruang untuk muncul */
+#game-container {
+    padding-bottom: 80px !important;
 }
