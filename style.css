@@ -828,17 +828,4 @@ html, body {
     grid-template-columns: 1fr;
   }
 }
-/* Pembaikan Paksa Skrol Elemen Dalaman */
-html, body, #game-container, .container, .card, main, div, section {
-    height: auto !important;
-    min-height: 100% !important;
-    max-height: none !important;
-    overflow-y: auto !important;
-    overflow-x: hidden !important;
-}
-
-/* Memastikan butang di bahagian bawah sentiasa ada ruang untuk muncul */
-#game-container {
-    padding-bottom: 80px !important;
-}
 
