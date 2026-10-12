@@ -828,3 +828,17 @@ html, body {
     grid-template-columns: 1fr;
   }
 }
+/* Kod Pembaikan Skrol untuk Telefon */
+body, html {
+    height: auto !important;
+    min-height: 100vh !important;
+    overflow-y: auto !important;
+}
+
+#game-container, .container {
+    height: auto !important;
+    min-height: 100% !important;
+    overflow: visible !important;
+    padding-bottom: 40px !important;
+}
+
