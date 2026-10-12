@@ -828,10 +828,30 @@ html, body {
     grid-template-columns: 1fr;
   }
 }
-/* Pembaikan Skrol Menyeluruh Khas Telefon */
-body, html, #game-container, main, div, section {
+/* Kod Pembaikan Menyeluruh: Fleksibel untuk Laptop & Telefon */
+html, body {
     height: auto !important;
     min-height: 100vh !important;
     overflow-y: auto !important;
     overflow-x: hidden !important;
+    margin: 0;
+    padding: 0;
+}
+
+/* Memastikan kontena utama mengecil ikut saiz skrin telefon */
+#game-container, .container, .card, main {
+    width: 100% !important;
+    max-width: 600px !important; /* Saiz ideal untuk komputer/laptop */
+    height: auto !important;
+    min-height: min-content !important;
+    margin: 0 auto !important;
+    box-sizing: border-box !important;
+    padding: 15px !important; /* Kurangkan padding supaya muat di telefon */
+    overflow: visible !important;
+}
+
+/* Mengelakkan teks atau kotak menu daripada terkeluar dari skrin */
+* {
+    max-width: 100% !important;
+    box-sizing: border-box !important;
 }
