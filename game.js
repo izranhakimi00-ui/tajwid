@@ -655,7 +655,6 @@ loadQuestion() {
     // Papar teks Arab dengan sorotan tajwid
     let formattedArabic = currentQ.verseArabic;
     if (currentQ.highlightWord) {
-      // Sorot kalimah utama menggunakan tag <mark>
       formattedArabic = formattedArabic.replace(
         currentQ.highlightWord,
         `<mark>${currentQ.highlightWord}</mark>`
@@ -669,64 +668,20 @@ loadQuestion() {
     this.optionsContainer.innerHTML = '';
     this.feedbackBox.classList.remove('active');
 
-    const letters = ['A', 'B', 'C', 'D'];
+    // 1. Salin array jawapan supaya data asal tidak rosak
+    const shuffledOptions = [...currentQ.options];
     
-    // 🛠️ KOD ADALAH LENGKAP: Memasukkan array [0, 1, 2, 3] untuk dikocok secara rawak
-    const orders =;
-    for (let i = orders.length - 1; i > 0; i--) {
+    // 2. Kocok susunan array jawapan secara rawak (Fisher-Yates Shuffle)
+    for (let i = shuffledOptions.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
-      [orders[i], orders[j]] = [orders[j], orders[i]];
+      const temp = shuffledOptions[i];
+      shuffledOptions[i] = shuffledOptions[j];
+      shuffledOptions[j] = temp;
     }
 
-    currentQ.options.forEach((opt, idx) => {
-      const btn = document.createElement('button');
-      btn.className = 'option-btn';
-      
-      // Susun kedudukan butang secara rawak dkt skrin guna CSS order
-      btn.style.order = orders[idx]; 
-      
-      btn.innerHTML = `
-        <span class="option-letter">${letters[idx]}</span>
-        <span class="option-text">${opt.text}</span>
-      `;
-      btn.addEventListener('click', () => this.handleAnswer(opt, btn, currentQ));
-      this.optionsContainer.appendChild(btn);
-    });
-  }
-      
-      // Susun kedudukan butang secara rawak dkt skrin guna CSS order
-      btn.style.order = orders[idx]; 
-      
-      btn.innerHTML = `
-        <span class="option-letter">${letters[idx]}</span>
-        <span class="option-text">${opt.text}</span>
-      `;
-      btn.addEventListener('click', () => this.handleAnswer(opt, btn, currentQ));
-      this.optionsContainer.appendChild(btn);
-    });
-  }
-      
-      // Susun kedudukan butang secara rawak dkt skrin guna CSS order
-      btn.style.order = orders[idx]; 
-      
-      btn.innerHTML = `
-        <span class="option-letter">${letters[idx]}</span>
-        <span class="option-text">${opt.text}</span>
-      `;
-      btn.addEventListener('click', () => this.handleAnswer(opt, btn, currentQ));
-      this.optionsContainer.appendChild(btn);
-    });
-  }
-    this.verseArabic.innerHTML = formattedArabic;
-    this.verseRef.textContent = `📖 ${currentQ.verseRef}`;
-    this.qText.textContent = currentQ.questionText;
-
-    // Sediakan Pilihan Jawapan
-    this.optionsContainer.innerHTML = '';
-    this.feedbackBox.classList.remove('active');
-
+    // 3. Bina butang jawapan A, B, C, D berdasarkan data yang telah dikocok
     const letters = ['A', 'B', 'C', 'D'];
-    currentQ.options.forEach((opt, idx) => {
+    shuffledOptions.forEach((opt, idx) => {
       const btn = document.createElement('button');
       btn.className = 'option-btn';
       btn.innerHTML = `
@@ -739,7 +694,6 @@ loadQuestion() {
   }
 
   handleAnswer(selectedOption, clickedBtn, question) {
-    // Kunci semua butang pilihan
     const allBtns = this.optionsContainer.querySelectorAll('.option-btn');
     allBtns.forEach(b => b.disabled = true);
 
@@ -751,17 +705,67 @@ loadQuestion() {
       this.correctStreak++;
       clickedBtn.classList.add('correct');
 
-      // Naikkan altitud (+100km)
       const altGain = 100;
       this.altitude += altGain;
       this.score += 250 + (this.correctStreak * 50);
 
-      // Enjin Anti-Graviti Mengaum Naik
       this.sound.playCorrect();
       this.sound.playThruster();
       this.renderer.boostThrusters();
       this.renderer.updateShipAltitude(this.altitude);
 
+      this.feedbackBox.className = 'feedback-box active status-correct';
+      this.feedbackTitle.className = 'feedback-title correct';
+      this.feedbackTitle.innerHTML = '🚀 TUJAHAN ANTI-GRAVITI DIAKTIFKAN!';
+      this.feedbackAltChange.className = 'feedback-altitude-change up';
+      this.feedbackAltChange.textContent = `+${altGain} km Altitud`;
+      this.feedbackExp.innerHTML = `<strong>Huraian Tajwid:</strong> ${question.explanation}`;
+
+    } else {
+      // === JAWAPAN SALAH ===
+      this.correctStreak = 0;
+      clickedBtn.classList.add('incorrect');
+
+      // 🛠️ KOD PEMBETULAN MANTAP: Cari butang di skrin yang memegang jawapan betul secara dinamik mengikut teks padanan
+      allBtns.forEach(btn => {
+        const btnText = btn.querySelector('.option-text').textContent;
+        const matchingOpt = question.options.find(o => o.text === btnText);
+        if (matchingOpt && matchingOpt.isCorrect) {
+          btn.classList.add('correct');
+        }
+      });
+
+      const altLoss = 50;
+      this.altitude = Math.max(0, this.altitude - altLoss);
+
+      this.sound.playIncorrect();
+      this.renderer.triggerGravityAlarm();
+      this.renderer.updateShipAltitude(this.altitude);
+
+      this.feedbackBox.className = 'feedback-box active status-incorrect';
+      this.feedbackTitle.className = 'feedback-title incorrect';
+      this.feedbackTitle.innerHTML = '⚠️ AMARAN! TARIKAN GRAVITI BERTAMBAH!';
+      this.feedbackAltChange.className = 'feedback-altitude-change down';
+      this.feedbackAltChange.textContent = `-${altLoss} km Altitud`;
+      this.feedbackExp.innerHTML = `<strong>Jawapan Tepat & Nota:</strong> ${question.explanation}`;
+    }
+
+    this.updateHUD();
+
+    if (this.altitude <= 0) {
+      setTimeout(() => {
+        this.triggerGameOver();
+      }, 1400);
+      return;
+    }
+
+    if (this.altitude >= this.targetAltitude) {
+      setTimeout(() => {
+        this.triggerVictory();
+      }, 1500);
+      return;
+    }
+  }
       // Papar Maklum Balas Positif
       this.feedbackBox.className = 'feedback-box active status-correct';
       this.feedbackTitle.className = 'feedback-title correct';
