@@ -1,6 +1,7 @@
 /**
  * Anti-Gravity Tajwid Challenge - Enjin Permainan & Kanvas Angkasa Lepas
  * Logik Interaktif, Fizik Kapal Angkasa, Sintesis Audio & Aliran Kursus Tajwid
+ * (Dioptimumkan, Disemak & Diselaraskan)
  */
 
 // ============================================================================
@@ -50,7 +51,6 @@ class SoundEffects {
     if (this.isMuted || !this.ctx) return;
     try {
       const now = this.ctx.currentTime;
-      // White noise buffer
       const bufferSize = this.ctx.sampleRate * 0.8;
       const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
       const data = buffer.getChannelData(0);
@@ -82,7 +82,7 @@ class SoundEffects {
   playCorrect() {
     if (this.isMuted || !this.ctx) return;
     try {
-      const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+      const notes = [523.25, 659.25, 783.99, 1046.50];
       notes.forEach((freq, idx) => {
         const osc = this.ctx.createOscillator();
         const gain = this.ctx.createGain();
@@ -149,19 +149,14 @@ class SpaceRenderer {
     this.height = window.innerHeight;
 
     this.stars = [];
-    this.particles = [];
     this.thrusterParticles = [];
     this.blackHoleRotation = 0;
 
-    // Kedudukan Kapal Angkasa
     this.ship = {
       x: this.width / 2,
       y: this.height * 0.65,
       targetY: this.height * 0.65,
-      vx: 0,
-      vy: 0,
       shake: 0,
-      tilt: 0,
       isBoosting: false,
       boostIntensity: 1,
       alertGlow: 0
@@ -200,21 +195,16 @@ class SpaceRenderer {
     }
   }
 
-  // Update Y kedudukan kapal berdasarkan altitud (0km = dekat lohong hitam, 500km = orbit tinggi)
   updateShipAltitude(altitudeKm) {
-    // 0km -> Y berhampiran 82% skrin (Zon Ufuk Peristiwa)
-    // 500km -> Y berhampiran 22% skrin (Orbit Selamat / Kelajuan Lepas)
     const clamped = Math.max(0, Math.min(500, altitudeKm));
     const fraction = clamped / 500;
-    const targetY = (this.height * 0.82) - (fraction * (this.height * 0.60));
-    this.ship.targetY = targetY;
+    this.ship.targetY = (this.height * 0.82) - (fraction * (this.height * 0.60));
   }
 
   boostThrusters() {
     this.ship.isBoosting = true;
     this.ship.boostIntensity = 3.5;
     this.ship.alertGlow = 0;
-    // Tambah pancutan zarah plasma anti-graviti
     for (let i = 0; i < 40; i++) {
       this.thrusterParticles.push({
         x: this.ship.x + (Math.random() * 20 - 10),
@@ -239,19 +229,10 @@ class SpaceRenderer {
     this.ctx.fillStyle = '#030712';
     this.ctx.fillRect(0, 0, this.width, this.height);
 
-    // 1. Lukis Bintang & Parallax
     this.renderStars();
-
-    // 2. Lukis Lohong Hitam (Black Hole) di bahagian bawah
     this.renderBlackHole();
-
-    // 3. Kemas kini fizik & gegaran kapal angkasa
     this.updatePhysics();
-
-    // 4. Lukis zarah tujahan plasma
     this.renderThrusters();
-
-    // 5. Lukis Kapal Angkasa Vektor Sci-Fi
     this.renderSpaceship();
 
     requestAnimationFrame(() => this.render());
@@ -264,7 +245,6 @@ class SpaceRenderer {
         star.y = 0;
         star.x = Math.random() * this.width;
       }
-
       this.ctx.fillStyle = star.color;
       this.ctx.globalAlpha = star.alpha;
       this.ctx.beginPath();
@@ -276,12 +256,11 @@ class SpaceRenderer {
 
   renderBlackHole() {
     const bhX = this.width / 2;
-    const bhY = this.height + 60; // Berada di dasar skrin
+    const bhY = this.height + 60;
     const bhRadius = Math.min(this.width * 0.28, 260);
 
     this.blackHoleRotation += 0.015;
 
-    // Cahaya Luaran Akresi (Accretion Disk Glow)
     const diskGrad = this.ctx.createRadialGradient(bhX, bhY, bhRadius * 0.5, bhX, bhY, bhRadius * 2.2);
     diskGrad.addColorStop(0, 'rgba(0, 0, 0, 1)');
     diskGrad.addColorStop(0.3, 'rgba(239, 71, 111, 0.45)');
@@ -294,7 +273,6 @@ class SpaceRenderer {
     this.ctx.arc(bhX, bhY, bhRadius * 2.2, 0, Math.PI * 2);
     this.ctx.fill();
 
-    // Gelang Partikel Akresi Berpusing
     this.ctx.save();
     this.ctx.translate(bhX, bhY);
     this.ctx.rotate(this.blackHoleRotation);
@@ -308,7 +286,6 @@ class SpaceRenderer {
     }
     this.ctx.restore();
 
-    // Event Horizon (Sfera Gelap Menelan Cahaya)
     const horizonGrad = this.ctx.createRadialGradient(bhX, bhY, bhRadius * 0.2, bhX, bhY, bhRadius);
     horizonGrad.addColorStop(0, '#000000');
     horizonGrad.addColorStop(0.85, '#050508');
@@ -319,7 +296,6 @@ class SpaceRenderer {
     this.ctx.arc(bhX, bhY, bhRadius, 0, Math.PI * 2);
     this.ctx.fill();
 
-    // Garis Ufuk Peristiwa (Event Horizon Ring)
     this.ctx.strokeStyle = 'rgba(0, 240, 255, 0.6)';
     this.ctx.lineWidth = 2;
     this.ctx.beginPath();
@@ -328,22 +304,18 @@ class SpaceRenderer {
   }
 
   updatePhysics() {
-    // Lerp Y ke target Y
     this.ship.y += (this.ship.targetY - this.ship.y) * 0.08;
 
-    // Mengurangkan gegaran perlahan-lahan
     if (this.ship.shake > 0) {
       this.ship.shake *= 0.88;
       if (this.ship.shake < 0.2) this.ship.shake = 0;
     }
 
-    // Mengurangkan amaran merah
     if (this.ship.alertGlow > 0) {
       this.ship.alertGlow *= 0.94;
       if (this.ship.alertGlow < 0.05) this.ship.alertGlow = 0;
     }
 
-    // Redakan boost
     if (this.ship.isBoosting) {
       this.ship.boostIntensity *= 0.96;
       if (this.ship.boostIntensity <= 1.05) {
@@ -354,7 +326,6 @@ class SpaceRenderer {
   }
 
   renderThrusters() {
-    // Kemas kini zarah plasma roket
     for (let i = this.thrusterParticles.length - 1; i >= 0; i--) {
       const p = this.thrusterParticles[i];
       p.x += p.vx;
@@ -387,7 +358,6 @@ class SpaceRenderer {
     this.ctx.save();
     this.ctx.translate(x, y);
 
-    // Amaran Merah jika ditarik ke bawah
     if (this.ship.alertGlow > 0) {
       this.ctx.strokeStyle = `rgba(239, 71, 111, ${this.ship.alertGlow})`;
       this.ctx.lineWidth = 4;
@@ -398,7 +368,6 @@ class SpaceRenderer {
       this.ctx.stroke();
     }
 
-    // Api Enjin Normal / Anti-Gravity Boost
     const flameHeight = this.ship.isBoosting ? 50 * this.ship.boostIntensity : 20 + Math.random() * 6;
     const flameGrad = this.ctx.createLinearGradient(0, 20, 0, 20 + flameHeight);
     if (this.ship.isBoosting) {
@@ -420,8 +389,6 @@ class SpaceRenderer {
     this.ctx.closePath();
     this.ctx.fill();
 
-    // Rangka Badan Kapal Angkasa (Sci-Fi Vector Interceptor)
-    // Sayap Kiri & Kanan
     this.ctx.fillStyle = '#1e293b';
     this.ctx.strokeStyle = '#00f0ff';
     this.ctx.lineWidth = 2;
@@ -436,7 +403,6 @@ class SpaceRenderer {
     this.ctx.fill();
     this.ctx.stroke();
 
-    // Badan Utama (Fuselage)
     const hullGrad = this.ctx.createLinearGradient(-12, 0, 12, 0);
     hullGrad.addColorStop(0, '#0f172a');
     hullGrad.addColorStop(0.5, '#334155');
@@ -452,7 +418,6 @@ class SpaceRenderer {
     this.ctx.fill();
     this.ctx.stroke();
 
-    // Kokpit Bercahaya (Cyan Energy Canopy)
     this.ctx.fillStyle = '#00f0ff';
     this.ctx.shadowBlur = 12;
     this.ctx.shadowColor = '#00f0ff';
@@ -460,7 +425,6 @@ class SpaceRenderer {
     this.ctx.ellipse(0, -8, 5, 12, 0, 0, Math.PI * 2);
     this.ctx.fill();
 
-    // Perisai Tenaga Halus (Subtle Energy Shield Aura)
     this.ctx.strokeStyle = 'rgba(0, 240, 255, 0.3)';
     this.ctx.lineWidth = 1.5;
     this.ctx.beginPath();
@@ -479,9 +443,8 @@ class AntiGravityTajwidGame {
     this.sound = new SoundEffects();
     this.renderer = null;
 
-    // Status Permainan
-    this.altitude = 100; // Mula pada 100km
-    this.targetAltitude = 500; // Sasaran Kelajuan Lepas
+    this.altitude = 100;
+    this.targetAltitude = 500;
     this.score = 0;
     this.currentLevelIdx = 0;
     this.currentQuestionIdx = 0;
@@ -489,7 +452,6 @@ class AntiGravityTajwidGame {
     this.totalCorrect = 0;
     this.totalAnswered = 0;
 
-    // Elemen DOM
     this.screenStart = document.getElementById('screen-start');
     this.screenGame = document.getElementById('screen-game');
     this.screenVictory = document.getElementById('screen-victory');
@@ -506,7 +468,6 @@ class AntiGravityTajwidGame {
     this.archiveContent = document.getElementById('archive-content');
     this.modalCloseBtn = document.getElementById('btn-close-archive');
 
-    // UI Soalan
     this.qLevelTag = document.getElementById('q-level-tag');
     this.qLevelName = document.getElementById('q-level-name');
     this.qCounter = document.getElementById('q-counter');
@@ -515,7 +476,6 @@ class AntiGravityTajwidGame {
     this.qText = document.getElementById('question-text');
     this.optionsContainer = document.getElementById('options-container');
 
-    // UI Maklum Balas
     this.feedbackBox = document.getElementById('feedback-box');
     this.feedbackTitle = document.getElementById('feedback-title');
     this.feedbackAltChange = document.getElementById('feedback-alt-change');
@@ -533,51 +493,63 @@ class AntiGravityTajwidGame {
   }
 
   initEvents() {
-    // Butang Mula
-    document.getElementById('btn-start-game').addEventListener('click', () => {
-      this.sound.init();
-      this.sound.playClick();
-      this.startGame();
-    });
+    // 🛠️ Penambahbaikan Keselamatan: Pastikan butang wujud sebelum ikat fungsi klik
+    const startBtn = document.getElementById('btn-start-game');
+    if (startBtn) {
+      startBtn.addEventListener('click', () => {
+        this.sound.init();
+        this.sound.playClick();
+        this.startGame();
+      });
+    }
 
-    // Butang Audio Toggle
-    this.hudAudioToggle.addEventListener('click', () => {
-      this.sound.init();
-      const isMuted = this.sound.toggleMute();
-      this.hudAudioToggle.innerHTML = isMuted ? '🔇 Bunyi: Mati' : '🔊 Bunyi: Hidup';
-    });
+    if (this.hudAudioToggle) {
+      this.hudAudioToggle.addEventListener('click', () => {
+        this.sound.init();
+        const isMuted = this.sound.toggleMute();
+        this.hudAudioToggle.innerHTML = isMuted ? '🔇 Bunyi: Mati' : '🔊 Bunyi: Hidup';
+      });
+    }
 
-    // Arkib Modal
-    this.hudArchiveBtn.addEventListener('click', () => {
-      this.sound.playClick();
-      this.modalArchive.classList.add('active');
-    });
+    if (this.hudArchiveBtn) {
+      this.hudArchiveBtn.addEventListener('click', () => {
+        this.sound.playClick();
+        this.modalArchive.classList.add('active');
+      });
+    }
 
-    this.modalCloseBtn.addEventListener('click', () => {
-      this.sound.playClick();
-      this.modalArchive.classList.remove('active');
-    });
+    if (this.modalCloseBtn) {
+      this.modalCloseBtn.addEventListener('click', () => {
+        this.sound.playClick();
+        this.modalArchive.classList.remove('active');
+      });
+    }
 
-    // Butang Seterusnya
-    this.btnNextQuestion.addEventListener('click', () => {
-      this.sound.playClick();
-      this.advanceQuestion();
-    });
+    if (this.btnNextQuestion) {
+      this.btnNextQuestion.addEventListener('click', () => {
+        this.sound.playClick();
+        this.advanceQuestion();
+      });
+    }
 
-    // Butang Main Semula (Victory & GameOver)
-    document.getElementById('btn-restart-victory').addEventListener('click', () => {
-      this.sound.playClick();
-      this.restartGame();
-    });
+    const vicRestart = document.getElementById('btn-restart-victory');
+    if (vicRestart) {
+      vicRestart.addEventListener('click', () => {
+        this.sound.playClick();
+        this.restartGame();
+      });
+    }
 
-    document.getElementById('btn-restart-gameover').addEventListener('click', () => {
-      this.sound.playClick();
-      this.restartGame();
-    });
+    const overRestart = document.getElementById('btn-restart-gameover');
+    if (overRestart) {
+      overRestart.addEventListener('click', () => {
+        this.sound.playClick();
+        this.restartGame();
+      });
+    }
 
-    // Pintasan Papan Kekunci (Pilihan 1-4, Enter untuk Seterusnya)
     window.addEventListener('keydown', (e) => {
-      if (this.screenGame.classList.contains('active')) {
+      if (this.screenGame && this.screenGame.classList.contains('active')) {
         if (!this.feedbackBox.classList.contains('active')) {
           if (['1', '2', '3', '4'].includes(e.key)) {
             const idx = parseInt(e.key, 10) - 1;
@@ -595,9 +567,9 @@ class AntiGravityTajwidGame {
 
   showScreen(screenElem) {
     [this.screenStart, this.screenGame, this.screenVictory, this.screenGameOver].forEach(s => {
-      s.classList.remove('active');
+      if (s) s.classList.remove('active');
     });
-    screenElem.classList.add('active');
+    if (screenElem) screenElem.classList.add('active');
   }
 
   startGame() {
@@ -620,39 +592,43 @@ class AntiGravityTajwidGame {
   }
 
   updateHUD() {
-    this.hudAltitudeVal.textContent = `${this.altitude} km`;
-    this.hudScoreVal.textContent = `${this.score}`;
+    if (this.hudAltitudeVal) this.hudAltitudeVal.textContent = `${this.altitude} km`;
+    if (this.hudScoreVal) this.hudScoreVal.textContent = `${this.score}`;
 
-    // Kemas kini pengisi bar altitud (0km - 500km)
     const pct = Math.max(0, Math.min(100, (this.altitude / this.targetAltitude) * 100));
-    this.hudAltitudeFill.style.width = `${pct}%`;
+    if (this.hudAltitudeFill) this.hudAltitudeFill.style.width = `${pct}%`;
 
-    // Amaran Graviti jika altitud terlalu rendah
-    if (this.altitude <= 50) {
-      this.hudGravityStatus.className = 'gravity-indicator danger';
-      this.hudGravityStatus.innerHTML = '⚠️ AMARAN GRAVITI EKSTREM';
-    } else if (this.altitude >= 400) {
-      this.hudGravityStatus.className = 'gravity-indicator';
-      this.hudGravityStatus.style.borderColor = 'var(--neon-green)';
-      this.hudGravityStatus.style.color = 'var(--neon-green)';
-      this.hudGravityStatus.innerHTML = '🛡️ ORBIT KESELAMATAN DICAPAI';
-    } else {
-      this.hudGravityStatus.className = 'gravity-indicator';
-      this.hudGravityStatus.style.borderColor = 'var(--neon-cyan)';
-      this.hudGravityStatus.style.color = 'var(--neon-cyan)';
-      this.hudGravityStatus.innerHTML = '🌌 SISTEM ANTI-GRAVITI STABIL';
+    if (this.hudGravityStatus) {
+      if (this.altitude <= 50) {
+        this.hudGravityStatus.className = 'gravity-indicator danger';
+        this.hudGravityStatus.innerHTML = '⚠️ AMARAN GRAVITI EKSTREM';
+      } else if (this.altitude >= 400) {
+        this.hudGravityStatus.className = 'gravity-indicator';
+        this.hudGravityStatus.style.borderColor = 'var(--neon-green)';
+        this.hudGravityStatus.style.color = 'var(--neon-green)';
+        this.hudGravityStatus.innerHTML = '🛡️ ORBIT KESELAMATAN DICAPAI';
+      } else {
+        this.hudGravityStatus.className = 'gravity-indicator';
+        this.hudGravityStatus.style.borderColor = 'var(--neon-cyan)';
+        this.hudGravityStatus.style.color = 'var(--neon-cyan)';
+        this.hudGravityStatus.innerHTML = '🌌 SISTEM ANTI-GRAVITI STABIL';
+      }
     }
   }
 
-loadQuestion() {
+  loadQuestion() {
+    if (typeof GAME_LEVELS === 'undefined') {
+      console.error('Ralat: GAME_LEVELS tidak ditemui. Pastikan fail data soalan dimuatkan.');
+      return;
+    }
+
     const currentLevel = GAME_LEVELS[this.currentLevelIdx];
     const currentQ = currentLevel.questions[this.currentQuestionIdx];
 
-    this.qLevelTag.textContent = `TAHAP ${currentLevel.level}`;
-    this.qLevelName.textContent = currentLevel.title;
-    this.qCounter.textContent = `Soalan ${this.currentQuestionIdx + 1} / ${currentLevel.questions.length}`;
+    if (this.qLevelTag) this.qLevelTag.textContent = `TAHAP ${currentLevel.level}`;
+    if (this.qLevelName) this.qLevelName.textContent = currentLevel.title;
+    if (this.qCounter) this.qCounter.textContent = `Soalan ${this.currentQuestionIdx + 1} / ${currentLevel.questions.length}`;
 
-    // Papar teks Arab dengan sorotan tajwid
     let formattedArabic = currentQ.verseArabic;
     if (currentQ.highlightWord) {
       formattedArabic = formattedArabic.replace(
@@ -660,18 +636,14 @@ loadQuestion() {
         `<mark>${currentQ.highlightWord}</mark>`
       );
     }
-    this.verseArabic.innerHTML = formattedArabic;
-    this.verseRef.textContent = `📖 ${currentQ.verseRef}`;
-    this.qText.textContent = currentQ.questionText;
+    if (this.verseArabic) this.verseArabic.innerHTML = formattedArabic;
+    if (this.verseRef) this.verseRef.textContent = `📖 ${currentQ.verseRef}`;
+    if (this.qText) this.qText.textContent = currentQ.questionText;
 
-    // Sediakan Pilihan Jawapan
-    this.optionsContainer.innerHTML = '';
-    this.feedbackBox.classList.remove('active');
+    if (this.optionsContainer) this.optionsContainer.innerHTML = '';
+    if (this.feedbackBox) this.feedbackBox.classList.remove('active');
 
-    // 1. Salin array jawapan supaya data asal tidak rosak
     const shuffledOptions = [...currentQ.options];
-    
-    // 2. Kocok susunan array jawapan secara rawak (Fisher-Yates Shuffle)
     for (let i = shuffledOptions.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       const temp = shuffledOptions[i];
@@ -679,7 +651,6 @@ loadQuestion() {
       shuffledOptions[j] = temp;
     }
 
-    // 3. Bina butang jawapan A, B, C, D berdasarkan data yang telah dikocok
     const letters = ['A', 'B', 'C', 'D'];
     shuffledOptions.forEach((opt, idx) => {
       const btn = document.createElement('button');
@@ -689,7 +660,7 @@ loadQuestion() {
         <span class="option-text">${opt.text}</span>
       `;
       btn.addEventListener('click', () => this.handleAnswer(opt, btn, currentQ));
-      this.optionsContainer.appendChild(btn);
+      if (this.optionsContainer) this.optionsContainer.appendChild(btn);
     });
   }
 
@@ -700,7 +671,6 @@ loadQuestion() {
     this.totalAnswered++;
 
     if (selectedOption.isCorrect) {
-      // === JAWAPAN BETUL ===
       this.totalCorrect++;
       this.correctStreak++;
       clickedBtn.classList.add('correct');
@@ -714,19 +684,23 @@ loadQuestion() {
       this.renderer.boostThrusters();
       this.renderer.updateShipAltitude(this.altitude);
 
-      this.feedbackBox.className = 'feedback-box active status-correct';
-      this.feedbackTitle.className = 'feedback-title correct';
-      this.feedbackTitle.innerHTML = '🚀 TUJAHAN ANTI-GRAVITI DIAKTIFKAN!';
-      this.feedbackAltChange.className = 'feedback-altitude-change up';
-      this.feedbackAltChange.textContent = `+${altGain} km Altitud`;
-      this.feedbackExp.innerHTML = `<strong>Huraian Tajwid:</strong> ${question.explanation}`;
+      if (this.feedbackBox) this.feedbackBox.className = 'feedback-box active status-correct';
+      if (this.feedbackTitle) {
+        this.feedbackTitle.className = 'feedback-title correct';
+        this.feedbackTitle.innerHTML = '🚀 TUJAHAN ANTI-GRAVITI DIAKTIFKAN!';
+      }
+      if (this.feedbackAltChange) {
+        this.feedbackAltChange.className = 'feedback-altitude-change up';
+        this.feedbackAltChange.textContent = `+${altGain} km Altitud`;
+      }
+      if (this.feedbackExp) {
+        this.feedbackExp.innerHTML = `<strong>Huraian Tajwid:</strong> ${question.explanation}`;
+      }
 
     } else {
-      // === JAWAPAN SALAH ===
       this.correctStreak = 0;
       clickedBtn.classList.add('incorrect');
 
-      // 🛠️ KOD PEMBETULAN MANTAP: Cari butang di skrin yang memegang jawapan betul secara dinamik mengikut teks padanan
       allBtns.forEach(btn => {
         const btnText = btn.querySelector('.option-text').textContent;
         const matchingOpt = question.options.find(o => o.text === btnText);
@@ -742,12 +716,18 @@ loadQuestion() {
       this.renderer.triggerGravityAlarm();
       this.renderer.updateShipAltitude(this.altitude);
 
-      this.feedbackBox.className = 'feedback-box active status-incorrect';
-      this.feedbackTitle.className = 'feedback-title incorrect';
-      this.feedbackTitle.innerHTML = '⚠️ AMARAN! TARIKAN GRAVITI BERTAMBAH!';
-      this.feedbackAltChange.className = 'feedback-altitude-change down';
-      this.feedbackAltChange.textContent = `-${altLoss} km Altitud`;
-      this.feedbackExp.innerHTML = `<strong>Jawapan Tepat & Nota:</strong> ${question.explanation}`;
+      if (this.feedbackBox) this.feedbackBox.className = 'feedback-box active status-incorrect';
+      if (this.feedbackTitle) {
+        this.feedbackTitle.className = 'feedback-title incorrect';
+        this.feedbackTitle.innerHTML = '⚠️ AMARAN! TARIKAN GRAVITI BERTAMBAH!';
+      }
+      if (this.feedbackAltChange) {
+        this.feedbackAltChange.className = 'feedback-altitude-change down';
+        this.feedbackAltChange.textContent = `-${altLoss} km Altitud`;
+      }
+      if (this.feedbackExp) {
+        this.feedbackExp.innerHTML = `<strong>Jawapan Tepat & Nota:</strong> ${question.explanation}`;
+      }
     }
 
     this.updateHUD();
@@ -759,168 +739,6 @@ loadQuestion() {
       return;
     }
 
-    if (this.altitude >= this.targetAltitude) {
-      setTimeout(() => {
-        this.triggerVictory();
-      }, 1500);
-      return;
-    }
-  }
-    this.verseArabic.innerHTML = formattedArabic;
-    this.verseRef.textContent = `📖 ${currentQ.verseRef}`;
-    this.qText.textContent = currentQ.questionText;
-
-    // Sediakan Pilihan Jawapan
-    this.optionsContainer.innerHTML = '';
-    this.feedbackBox.classList.remove('active');
-
-    // 1. Salin array jawapan supaya data asal tidak rosak
-    const shuffledOptions = [...currentQ.options];
-    
-    // 2. Kocok susunan array jawapan secara rawak (Fisher-Yates Shuffle)
-    for (let i = shuffledOptions.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      const temp = shuffledOptions[i];
-      shuffledOptions[i] = shuffledOptions[j];
-      shuffledOptions[j] = temp;
-    }
-
-    // 3. Bina butang jawapan A, B, C, D berdasarkan data yang telah dikocok
-    const letters = ['A', 'B', 'C', 'D'];
-    shuffledOptions.forEach((opt, idx) => {
-      const btn = document.createElement('button');
-      btn.className = 'option-btn';
-      btn.innerHTML = `
-        <span class="option-letter">${letters[idx]}</span>
-        <span class="option-text">${opt.text}</span>
-      `;
-      btn.addEventListener('click', () => this.handleAnswer(opt, btn, currentQ));
-      this.optionsContainer.appendChild(btn);
-    });
-  }
-
-  handleAnswer(selectedOption, clickedBtn, question) {
-    const allBtns = this.optionsContainer.querySelectorAll('.option-btn');
-    allBtns.forEach(b => b.disabled = true);
-
-    this.totalAnswered++;
-
-    if (selectedOption.isCorrect) {
-      // === JAWAPAN BETUL ===
-      this.totalCorrect++;
-      this.correctStreak++;
-      clickedBtn.classList.add('correct');
-
-      const altGain = 100;
-      this.altitude += altGain;
-      this.score += 250 + (this.correctStreak * 50);
-
-      this.sound.playCorrect();
-      this.sound.playThruster();
-      this.renderer.boostThrusters();
-      this.renderer.updateShipAltitude(this.altitude);
-
-      this.feedbackBox.className = 'feedback-box active status-correct';
-      this.feedbackTitle.className = 'feedback-title correct';
-      this.feedbackTitle.innerHTML = '🚀 TUJAHAN ANTI-GRAVITI DIAKTIFKAN!';
-      this.feedbackAltChange.className = 'feedback-altitude-change up';
-      this.feedbackAltChange.textContent = `+${altGain} km Altitud`;
-      this.feedbackExp.innerHTML = `<strong>Huraian Tajwid:</strong> ${question.explanation}`;
-
-    } else {
-      // === JAWAPAN SALAH ===
-      this.correctStreak = 0;
-      clickedBtn.classList.add('incorrect');
-
-      // 🛠️ KOD PEMBETULAN MANTAP: Cari butang di skrin yang memegang jawapan betul secara dinamik mengikut teks padanan
-      allBtns.forEach(btn => {
-        const btnText = btn.querySelector('.option-text').textContent;
-        const matchingOpt = question.options.find(o => o.text === btnText);
-        if (matchingOpt && matchingOpt.isCorrect) {
-          btn.classList.add('correct');
-        }
-      });
-
-      const altLoss = 50;
-      this.altitude = Math.max(0, this.altitude - altLoss);
-
-      this.sound.playIncorrect();
-      this.renderer.triggerGravityAlarm();
-      this.renderer.updateShipAltitude(this.altitude);
-
-      this.feedbackBox.className = 'feedback-box active status-incorrect';
-      this.feedbackTitle.className = 'feedback-title incorrect';
-      this.feedbackTitle.innerHTML = '⚠️ AMARAN! TARIKAN GRAVITI BERTAMBAH!';
-      this.feedbackAltChange.className = 'feedback-altitude-change down';
-      this.feedbackAltChange.textContent = `-${altLoss} km Altitud`;
-      this.feedbackExp.innerHTML = `<strong>Jawapan Tepat & Nota:</strong> ${question.explanation}`;
-    }
-
-    this.updateHUD();
-
-    if (this.altitude <= 0) {
-      setTimeout(() => {
-        this.triggerGameOver();
-      }, 1400);
-      return;
-    }
-
-    if (this.altitude >= this.targetAltitude) {
-      setTimeout(() => {
-        this.triggerVictory();
-      }, 1500);
-      return;
-    }
-  }
-      // Papar Maklum Balas Positif
-      this.feedbackBox.className = 'feedback-box active status-correct';
-      this.feedbackTitle.className = 'feedback-title correct';
-      this.feedbackTitle.innerHTML = '🚀 TUJAHAN ANTI-GRAVITI DIAKTIFKAN!';
-      this.feedbackAltChange.className = 'feedback-altitude-change up';
-      this.feedbackAltChange.textContent = `+${altGain} km Altitud`;
-      this.feedbackExp.innerHTML = `<strong>Huraian Tajwid:</strong> ${question.explanation}`;
-
-    } else {
-      // === JAWAPAN SALAH ===
-      this.correctStreak = 0;
-      clickedBtn.classList.add('incorrect');
-
-      // Tandakan juga jawapan yang betul untuk pembelajaran
-      question.options.forEach((opt, idx) => {
-        if (opt.isCorrect) {
-          allBtns[idx].classList.add('correct');
-        }
-      });
-
-      // Turunkan altitud (-50km)
-      const altLoss = 50;
-      this.altitude = Math.max(0, this.altitude - altLoss);
-
-      // Gegaran dan Amaran Graviti Lohong Hitam
-      this.sound.playIncorrect();
-      this.renderer.triggerGravityAlarm();
-      this.renderer.updateShipAltitude(this.altitude);
-
-      // Papar Maklum Balas Pembetulan
-      this.feedbackBox.className = 'feedback-box active status-incorrect';
-      this.feedbackTitle.className = 'feedback-title incorrect';
-      this.feedbackTitle.innerHTML = '⚠️ AMARAN! TARIKAN GRAVITI BERTAMBAH!';
-      this.feedbackAltChange.className = 'feedback-altitude-change down';
-      this.feedbackAltChange.textContent = `-${altLoss} km Altitud`;
-      this.feedbackExp.innerHTML = `<strong>Jawapan Tepat & Nota:</strong> ${question.explanation}`;
-    }
-
-    this.updateHUD();
-
-    // Semak sekiranya Kapal Terperangkap di Ufuk Peristiwa (Game Over)
-    if (this.altitude <= 0) {
-      setTimeout(() => {
-        this.triggerGameOver();
-      }, 1400);
-      return;
-    }
-
-    // Semak sekiranya sudah mencapai kelajuan lepas keselamatan (>= 500km)
     if (this.altitude >= this.targetAltitude) {
       setTimeout(() => {
         this.triggerVictory();
@@ -933,12 +751,10 @@ loadQuestion() {
     const currentLevel = GAME_LEVELS[this.currentLevelIdx];
     this.currentQuestionIdx++;
 
-    // Jika tamat soalan dalam tahap semasa, beralih ke tahap seterusnya
     if (this.currentQuestionIdx >= currentLevel.questions.length) {
       this.currentLevelIdx++;
       this.currentQuestionIdx = 0;
 
-      // Sekiranya semua tahap telah dihabiskan
       if (this.currentLevelIdx >= GAME_LEVELS.length) {
         this.triggerVictory();
         return;
@@ -952,21 +768,29 @@ loadQuestion() {
     this.sound.playVictory();
     this.showScreen(this.screenVictory);
 
-    document.getElementById('vic-altitude').textContent = `${this.altitude} km`;
-    document.getElementById('vic-score').textContent = `${this.score}`;
+    const vicAlt = document.getElementById('vic-altitude');
+    const vicScore = document.getElementById('vic-score');
+    const vicAcc = document.getElementById('vic-accuracy');
+
+    if (vicAlt) vicAlt.textContent = `${this.altitude} km`;
+    if (vicScore) vicScore.textContent = `${this.score}`;
     const acc = Math.round((this.totalCorrect / Math.max(1, this.totalAnswered)) * 100);
-    document.getElementById('vic-accuracy').textContent = `${acc}%`;
+    if (vicAcc) vicAcc.textContent = `${acc}%`;
   }
 
   triggerGameOver() {
     this.sound.playIncorrect();
     this.showScreen(this.screenGameOver);
 
-    document.getElementById('over-score').textContent = `${this.score}`;
-    document.getElementById('over-level').textContent = `Tahap ${this.currentLevelIdx + 1}: ${GAME_LEVELS[this.currentLevelIdx].title}`;
+    const overScore = document.getElementById('over-score');
+    const overLevel = document.getElementById('over-level');
+
+    if (overScore) overScore.textContent = `${this.score}`;
+    if (overLevel) overLevel.textContent = `Tahap ${this.currentLevelIdx + 1}: ${GAME_LEVELS[this.currentLevelIdx].title}`;
   }
 
   renderArchiveModal() {
+    if (!this.archiveContent || typeof TAJWID_ARCHIVE === 'undefined') return;
     this.archiveContent.innerHTML = '';
     TAJWID_ARCHIVE.forEach(item => {
       const card = document.createElement('div');
