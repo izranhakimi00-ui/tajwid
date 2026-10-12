@@ -644,10 +644,34 @@ class AntiGravityTajwidGame {
     }
   }
 
- // === GANTIKAN KOD DI BAWAH BARIS 670 DENGAN KOD INI ===
+loadQuestion() {
+    const currentLevel = GAME_LEVELS[this.currentLevelIdx];
+    const currentQ = currentLevel.questions[this.currentQuestionIdx];
+
+    this.qLevelTag.textContent = `TAHAP ${currentLevel.level}`;
+    this.qLevelName.textContent = currentLevel.title;
+    this.qCounter.textContent = `Soalan ${this.currentQuestionIdx + 1} / ${currentLevel.questions.length}`;
+
+    // Papar teks Arab dengan sorotan tajwid
+    let formattedArabic = currentQ.verseArabic;
+    if (currentQ.highlightWord) {
+      // Sorot kalimah utama menggunakan tag <mark>
+      formattedArabic = formattedArabic.replace(
+        currentQ.highlightWord,
+        `<mark>${currentQ.highlightWord}</mark>`
+      );
+    }
+    this.verseArabic.innerHTML = formattedArabic;
+    this.verseRef.textContent = `📖 ${currentQ.verseRef}`;
+    this.qText.textContent = currentQ.questionText;
+
+    // Sediakan Pilihan Jawapan
+    this.optionsContainer.innerHTML = '';
+    this.feedbackBox.classList.remove('active');
+
     const letters = ['A', 'B', 'C', 'D'];
     
-    // 🛠️ KOD PEMBETULAN: Sediakan nombor susunan (order) visual dan rawakkannya
+    // 🛠️ KOD PEMBETULAN: Sediakan array susunan indeks visual (0 hingga 3)
     const orders =;
     for (let i = orders.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
