@@ -644,23 +644,31 @@ class AntiGravityTajwidGame {
     }
   }
 
-  loadQuestion() {
-    const currentLevel = GAME_LEVELS[this.currentLevelIdx];
-    const currentQ = currentLevel.questions[this.currentQuestionIdx];
-
-    this.qLevelTag.textContent = `TAHAP ${currentLevel.level}`;
-    this.qLevelName.textContent = currentLevel.title;
-    this.qCounter.textContent = `Soalan ${this.currentQuestionIdx + 1} / ${currentLevel.questions.length}`;
-
-    // Papar teks Arab dengan sorotan tajwid
-    let formattedArabic = currentQ.verseArabic;
-    if (currentQ.highlightWord) {
-      // Sorot kalimah utama menggunakan tag <mark>
-      formattedArabic = formattedArabic.replace(
-        currentQ.highlightWord,
-        `<mark>${currentQ.highlightWord}</mark>`
-      );
+ // === GANTIKAN KOD DI BAWAH BARIS 670 DENGAN KOD INI ===
+    const letters = ['A', 'B', 'C', 'D'];
+    
+    // 🛠️ KOD PEMBETULAN: Sediakan nombor susunan (order) visual dan rawakkannya
+    const orders =;
+    for (let i = orders.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [orders[i], orders[j]] = [orders[j], orders[i]];
     }
+
+    currentQ.options.forEach((opt, idx) => {
+      const btn = document.createElement('button');
+      btn.className = 'option-btn';
+      
+      // Susun kedudukan butang secara rawak dkt skrin guna CSS order
+      btn.style.order = orders[idx]; 
+      
+      btn.innerHTML = `
+        <span class="option-letter">${letters[idx]}</span>
+        <span class="option-text">${opt.text}</span>
+      `;
+      btn.addEventListener('click', () => this.handleAnswer(opt, btn, currentQ));
+      this.optionsContainer.appendChild(btn);
+    });
+  }
     this.verseArabic.innerHTML = formattedArabic;
     this.verseRef.textContent = `📖 ${currentQ.verseRef}`;
     this.qText.textContent = currentQ.questionText;
